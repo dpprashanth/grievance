@@ -1,4 +1,6 @@
 
+from config import ESCALATION_THRESHOLD_DAYS
+
 from fastapi import FastAPI, Depends, HTTPException
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
@@ -81,7 +83,7 @@ def get_grievance_status(grievance, db):
         # Check if escalation is needed
         try:
             created_dt = datetime.strptime(grievance.created_at[:19], "%Y-%m-%dT%H:%M:%S")
-            if (datetime.now() - created_dt).days > 2:
+            if (datetime.now() - created_dt).days > ESCALATION_THRESHOLD_DAYS:
                 return "Escalated"
         except Exception:
             pass
@@ -197,7 +199,7 @@ def get_l3_grievances(db: Session = Depends(get_db)):
             g.status == GrievanceStatus.acknowledged and emp and emp.hierarchy == HierarchyLevel.L3
         )
         is_escalated = (
-            (g.status == GrievanceStatus.escalated or (g.status == GrievanceStatus.submitted and (now - created_dt).days > 2 and not g.acknowledged_by))
+            (g.status == GrievanceStatus.escalated or (g.status == GrievanceStatus.submitted and (now - created_dt).days > ESCALATION_THRESHOLD_DAYS and not g.acknowledged_by))
         )
         if is_acknowledged_by_l3:
             status = f"Acknowledged by {emp.name}" if emp else "Acknowledged"

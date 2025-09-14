@@ -33,7 +33,7 @@ document.getElementById('login-form').onsubmit = async function(e) {
         document.getElementById('login-ui').style.display = 'none';
         if (currentUser.hierarchy === 'L1') {
             document.getElementById('l1-ui').style.display = 'block';
-            document.getElementById('submitter').value = currentUser.id;
+            document.getElementById('l1-result').innerText = '';
             loadL1Grievances();
             clearInterval(l1Interval); clearInterval(l2Interval); clearInterval(l3Interval);
             l1Interval = setInterval(loadL1Grievances, 5000);
@@ -63,11 +63,11 @@ document.getElementById('grievance-form').onsubmit = async function(e) {
         return;
     }
     const description = document.getElementById('description').value;
-    const submitter = currentUser.id;
+    const submitter_id = currentUser.id;
     const res = await fetch('http://localhost:8000/grievance', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({description, submitter_id: submitter})
+        body: JSON.stringify({description, submitter_id})
     });
     const data = await res.json();
     document.getElementById('l1-result').innerText = data.message || 'Grievance submitted!';
